@@ -12,7 +12,11 @@ plot = (imagedata, x, y, c, r, g, b) ->
   imageData.data[index * 4 + 3] = c * 255
   return
 
-drawLine = (imagedata, x0, y0, x1, y1, r, g, b) ->
+drawLine = (imagedata, x0, y0, x1, y1, w, r, g, b) ->
+  # Ensure positive integer values for width
+  if w < 1
+    w = 1
+  w = Math.floor(w)
 
   # If drawing a dot, the call drawDot function
   #if Math.abs(y1 - y0) < 1.0 && Math.abs(x1 - x0) < 1.0
@@ -39,7 +43,7 @@ drawLine = (imagedata, x0, y0, x1, y1, r, g, b) ->
 
   # Handle first endpoint
   xend = Math.round(x0)
-  yend = y0 + gradient * (xend - x0)
+  yend = y0 - (w - 1) * 0.5 + gradient * (xend - x0)
   xgap = 1 - (x0 + 0.5 - xend)
   xpxl1 = xend # this will be used in the main loop
   ypxl1 = Math.floor(yend)
@@ -47,17 +51,19 @@ drawLine = (imagedata, x0, y0, x1, y1, r, g, b) ->
   rfpart = 1 - fpart
 
   if steep
-    plot(imagedata, ypxl1    , xpxl1, rfpart * xgap, r, g, b)
-    plot(imagedata, ypxl1 + 1, xpxl1,  fpart * xgap, r, g, b)
+    plot imagedata, ypxl1    , xpxl1, rfpart * xgap, r, g, b
+    plot imagedata, ypxl1 + i, xpxl1,             1, r, g, b for i in [1...w]
+    plot imagedata, ypxl1 + w, xpxl1,  fpart * xgap, r, g, b
   else
-    plot(imagedata, xpxl1, ypxl1    , rfpart * xgap, r, g, b)
-    plot(imagedata, xpxl1, ypxl1 + 1,  fpart * xgap, r, g, b)
+    plot imagedata, xpxl1, ypxl1    , rfpart * xgap, r, g, b
+    plot imagedata, xpxl1, ypxl1 + i,             1, r, g, b for i in [1...w]
+    plot imagedata, xpxl1, ypxl1 + w,  fpart * xgap, r, g, b
 
   intery = yend + gradient # first y-intersection for the main loop
 
   # Handle second endpoint
   xend = Math.round(x1)
-  yend = y1 + gradient * (xend - x1)
+  yend = y1 - (w - 1) * 0.5 + gradient * (xend - x1)
   xgap = 1 - (x1 + 0.5 - xend)
   xpxl2 = xend # this will be used in the main loop
   ypxl2 = Math.floor(yend)
@@ -65,11 +71,13 @@ drawLine = (imagedata, x0, y0, x1, y1, r, g, b) ->
   rfpart = 1 - fpart
 
   if steep
-    plot(imagedata, ypxl2    , xpxl2, rfpart * xgap, r, g, b)
-    plot(imagedata, ypxl2 + 1, xpxl2,  fpart * xgap, r, g, b)
+    plot imagedata, ypxl2    , xpxl2, rfpart * xgap, r, g, b
+    plot imagedata, ypxl2 + i, xpxl2,             1, r, g, b for i in [1...w]
+    plot imagedata, ypxl2 + w, xpxl2,  fpart * xgap, r, g, b
   else
-    plot(imagedata, xpxl2, ypxl2    , rfpart * xgap, r, g, b)
-    plot(imagedata, xpxl2, ypxl2 + 1,  fpart * xgap, r, g, b)
+    plot imagedata, xpxl2, ypxl2    , rfpart * xgap, r, g, b
+    plot imagedata, xpxl2, ypxl2 + i,             1, r, g, b for i in [1...w]
+    plot imagedata, xpxl2, ypxl2 + w,  fpart * xgap, r, g, b
 
   # main loop
   if steep
@@ -77,15 +85,17 @@ drawLine = (imagedata, x0, y0, x1, y1, r, g, b) ->
       fpart = intery - Math.floor(intery)
       rfpart = 1 - fpart
       y = Math.floor(intery)
-      plot(imagedata, y    , x, rfpart, r, g, b)
-      plot(imagedata, y + 1, x,  fpart, r, g, b)
+      plot imagedata, y    , x, rfpart, r, g, b
+      plot imagedata, y + i, x,      1, r, g, b for i in [1...w]
+      plot imagedata, y + w, x,  fpart, r, g, b
       intery = intery + gradient
   else
     for x in [xpxl1 + 1...xpxl2]
       fpart = intery - Math.floor(intery)
       rfpart = 1 - fpart
       y = Math.floor(intery)
-      plot(imagedata, x, y    , rfpart, r, g, b)
-      plot(imagedata, x, y + 1,  fpart, r, g, b)
+      plot imagedata, x, y    , rfpart, r, g, b
+      plot imagedata, x, y + i,      1, r, g, b for i in [1...w]
+      plot imagedata, x, y + w,  fpart, r, g, b
       intery = intery + gradient
   return
