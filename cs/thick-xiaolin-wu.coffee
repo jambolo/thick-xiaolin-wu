@@ -92,3 +92,5 @@ drawLine = (x0, y0, x1, y1, w, drawPixel) ->
       drawPixel x, y + w,  fpart
       intery = intery + gradient
   return
+
+export default drawLine
